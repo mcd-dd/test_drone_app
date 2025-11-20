@@ -31,8 +31,8 @@ from dronekit import connect, VehicleMode, LocationGlobalRelative
 from pymavlink import mavutil
 from sqlmodel import Session, select
 
-from app.models import FlightPath, Waypoint, Mission
-from app.database import engine
+from backend.app.models import FlightPath, Waypoint, Mission
+from backend.app.database import engine
 
 # ===============================================================
 # Global constants and locks
