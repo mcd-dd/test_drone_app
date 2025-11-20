@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+requests
+pandas
+folium
+pydeck
+python-dotenv
+dronekit
+pymavlink
+future
+streamlit
+streamlit-folium
+streamlit-autorefresh
