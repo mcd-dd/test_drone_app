@@ -28,7 +28,7 @@ from .database import engine
 # GLOBAL CONSTANTS
 # ===============================================================
 
-API_BASE = "http://localhost:8000"  # Adjust if backend runs remotely
+API_BASE = "https://testdroneapp-production.up.railway.app/"  # Adjust if backend runs remotely
 SAFE_DISTANCE_METERS = 10.0          # Minimum drone separation
 paused_drones = set()                # Track paused drones for safety logic
 

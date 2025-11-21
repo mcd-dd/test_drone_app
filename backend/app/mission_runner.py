@@ -38,8 +38,8 @@ from backend.app.database import engine
 # Global constants and locks
 # ===============================================================
 
-API_BASE = "http://localhost:8000"
-# API_BASE = "https://web-production-56f1.up.railway.app/"
+# API_BASE = "http://localhost:8000"
+API_BASE = "https://testdroneapp-production.up.railway.app/"
 SAFE_DISTANCE_METERS = 2.0  # Min separation for collision avoidance
 WAYPOINT_LOCKS = {}         # Per-drone DB access locks
 
