@@ -16,7 +16,7 @@ import os
 # ===============================================================
 
 # Path to SQLite database (can be overridden via environment variable)
-DB_FILE = os.environ.get("MP_DB", "mission_planner.db")
+DB_FILE = os.environ.get("MP_DB", "backend/mission_planner.db")
 
 # Full database connection string
 DATABASE_URL = f"sqlite:///{DB_FILE}"
