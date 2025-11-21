@@ -32,7 +32,8 @@ page = st.sidebar.radio(
 )
 
 # API = st.sidebar.text_input("API base URL", value="http://localhost:8000")
-API = st.sidebar.text_input("API base URL", value="https://flytbase-assignment-production.up.railway.app/")
+# API = st.sidebar.text_input("API base URL", value="https://flytbase-assignment-production.up.railway.app/")
+API = st.sidebar.text_input("API base URL", value="https://web-production-56f1.up.railway.app/")
 
 # -------------------------------
 # 1️⃣ MISSION PLANNER DASHBOARD
