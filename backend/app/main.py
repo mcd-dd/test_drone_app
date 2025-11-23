@@ -10,8 +10,8 @@ import time
 from threading import Lock
 from typing import List
 
-from app import crud, models
-from app.database import init_db, get_session
+from backend.app import crud, models
+from backend.app.database import init_db, get_session
 
 # ===============================================================
 # GLOBAL CONFIG
