@@ -670,7 +670,7 @@ elif page == "📡 Mission Monitoring":
         st.session_state.trail = {}
 
     for t in telemetry:
-        d = t["drone_id"]
+        d = int(t["drone_id"])
         point = (t["latitude"], t["longitude"])
         st.session_state.trail.setdefault(d, []).append(point)
 
@@ -689,7 +689,7 @@ elif page == "📡 Mission Monitoring":
 
     # Add drone markers + trails
     for i, t in df.iterrows():
-        d_id = t["drone_id"]
+        d_id = int(t["drone_id"])
         color = palette[(d_id - 1) % len(palette)]
 
         # Drone marker
@@ -721,7 +721,7 @@ elif page == "📡 Mission Monitoring":
 
     for d in drones:
         cols = st.columns([1, 1, 1, 1, 2])
-        d_id = d["id"]
+        d_id = int(d["id"])
 
         cols[0].write(f"🛩 **Drone {d_id}**")
         cols[1].button("🚀 Start", key=f"start_{d_id}", 
