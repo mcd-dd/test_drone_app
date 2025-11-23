@@ -423,316 +423,211 @@ elif page == "🚁 Fleet Visualization":
 # -----------------------------------------------------------
 # 3️⃣  REAL-TIME MISSION MONITORING DASHBOARD (Enhanced UI)
 # -----------------------------------------------------------
-# elif page == "📡 Mission Monitoring":
-#     import pydeck as pdk
-
-#     st.title("🛰 Multi-Drone Mission Control Center")
-#     refresh_interval = st.sidebar.slider("Telemetry refresh (seconds)", 1, 20, 3)
-#     placeholder = st.empty()
-
-#     colors = [
-#         [0, 100, 255],   # blue
-#         [0, 200, 100],   # green
-#         [255, 50, 50],   # red
-#         [255, 150, 0],   # orange
-#         [150, 0, 255],   # purple
-#     ]
-
-#     if "drone_paths" not in st.session_state:
-#         st.session_state["drone_paths"] = {}
-
-#     count = st_autorefresh(interval=refresh_interval * 1000, key="mission_refresh")
-#     placeholder = st.empty()
-
-#     def send_command(endpoint, params, success_msg, warn=False):
-#         try:
-#             r = requests.post(f"{API}/{endpoint}", params=params)
-#             if r.ok:
-#                 if warn:
-#                     st.warning(r.json().get("message", success_msg))
-#                 else:
-#                     st.success(r.json().get("message", success_msg))
-#             else:
-#                 st.error(r.text)
-#         except Exception as e:
-#             st.error(f"Error calling {endpoint}: {e}")
-
-#     with placeholder.container():
-#         st.subheader("🚁 Active Drones")
-
-#         try:
-#             drones = requests.get(f"{API}/drones").json()
-#             telemetry = requests.get(f"{API}/telemetry").json()
-#         except Exception as e:
-#             st.error(f"Error fetching data: {e}")
-#             drones, telemetry = [], []
-
-#         if not drones:
-#             st.info("No drones available.")
-#         else:
-#             telem_map = {t["drone_id"]: t for t in telemetry}
-
-#             # ✅ 3 cards per row (adjust dynamically)
-#             drones_per_row = 3
-#             for i in range(0, len(drones), drones_per_row):
-#                 row_drones = drones[i:i + drones_per_row]
-#                 cols = st.columns(len(row_drones))
-
-#                 for idx, d in enumerate(row_drones):
-#                     with cols[idx]:
-#                         t = telem_map.get(d["id"])
-#                         prog = int(t["progress"]) if t else 0
-#                         bat = t["battery"] if t else d["battery_level"]
-#                         eta = t["eta"] if t else "Calculating..."
-
-#                         # 🎯 Drone Header
-#                         st.markdown(f"### 🛩 Drone {d['id']} — {d['name']}")
-#                         st.metric("Battery", f"{bat}%")
-#                         st.progress(prog)
-#                         st.caption(f"Status: {d['status'].capitalize()} | ETA: {eta}")
-
-#                         # 🎮 Control Buttons (side-by-side)
-#                         btns = st.columns(4)
-
-#                         if btns[0].button("🚀 Start", key=f"start_{d['id']}"):
-#                             send_command("missions/start", {"drone_id": d["id"]}, "Mission started")
-
-#                         if btns[1].button("⏸ Pause", key=f"pause_{d['id']}"):
-#                             send_command("missions/pause", {"drone_id": d["id"]}, "Mission paused")
-
-#                         if btns[2].button("▶️ Resume", key=f"resume_{d['id']}"):
-#                             send_command("missions/resume", {"drone_id": d["id"]}, "Mission resumed")
-
-#                         if btns[3].button("🛑 Abort", key=f"abort_{d['id']}"):
-#                             send_command("missions/abort", {"drone_id": d["id"]}, "Mission aborted", warn=True)
-                    
-#             st.divider()
-
-#             # --- Enhanced 3D Mission Visualization ---
-#             st.subheader("🌍 Real-Time Drone Flight Map (3D View)")
-
-#             if telemetry:
-#                 # Convert telemetry to DataFrame
-#                 df_map = pd.DataFrame([
-#                     {
-#                         "drone_id": t["drone_id"],
-#                         "lat": t["latitude"],
-#                         "lon": t["longitude"],
-#                         "alt": t["altitude"],
-#                         "progress": t["progress"],
-#                     }
-#                     for t in telemetry
-#                 ])
-
-#                 # Update path history
-#                 for t in telemetry:
-#                     d_id = t["drone_id"]
-#                     if d_id not in st.session_state["drone_paths"]:
-#                         st.session_state["drone_paths"][d_id] = []
-#                     st.session_state["drone_paths"][d_id].append(
-#                         (t["longitude"], t["latitude"], t["altitude"])
-#                     )
-#                     # Keep last 200 points max
-#                     if len(st.session_state["drone_paths"][d_id]) > 200:
-#                         st.session_state["drone_paths"][d_id] = st.session_state["drone_paths"][d_id][-200:]
-
-#                 # Build deck.gl layers
-#                 layers = []
-
-#                 for idx, (d_id, path_points) in enumerate(st.session_state["drone_paths"].items()):
-#                     color = colors[idx % len(colors)]
-
-#                     # Flight trail (3D)
-#                     path_df = pd.DataFrame([{"path": path_points}])
-#                     layers.append(pdk.Layer(
-#                         "PathLayer",
-#                         data=path_df,
-#                         get_path="path",
-#                         get_color=color,
-#                         width_scale=10,
-#                         width_min_pixels=3,
-#                         get_width=5,
-#                         opacity=0.7,
-#                     ))
-
-#                     # Current drone marker (3D sphere)
-#                     lon, lat, alt = path_points[-1]
-#                     layers.append(pdk.Layer(
-#                         "ColumnLayer",
-#                         data=pd.DataFrame([{"lon": lon, "lat": lat, "alt": alt}]),
-#                         get_position='[lon, lat]',
-#                         get_elevation="alt",
-#                         elevation_scale=1,
-#                         radius=10,
-#                         get_fill_color=color,
-#                         pickable=True,
-#                     ))
-
-#                 # Dynamic 3D camera
-#                 midpoint = [df_map["lat"].mean(), df_map["lon"].mean()]
-#                 view_state = pdk.ViewState(
-#                     latitude=midpoint[0],
-#                     longitude=midpoint[1],
-#                     zoom=17,
-#                     pitch=60,
-#                     bearing=0,
-#                 )
-
-#                 # Deck rendering
-#                 deck = pdk.Deck(
-#                     map_style="mapbox://styles/mapbox/satellite-v9",
-#                     layers=layers,
-#                     initial_view_state=view_state,
-#                     tooltip={"text": "Drone {drone_id}\nAltitude: {alt} m"},
-#                 )
-
-#                 col1, col2 = st.columns([3, 2])
-
-#                 with col1:
-#                     st.pydeck_chart(deck, use_container_width=True)
-
-#                 with col2:
-#                     st.subheader("🛣️ Street View (Google)")
-#                     if telemetry:
-#                         # Get last drone position
-#                         t = telemetry[-1]
-#                         lat, lon = t["latitude"], t["longitude"]
-#                         # ✅ Correct Street View URL (uses embedded Google Maps with lat/lon)
-
-#                         markers = ""
-#                         for t in telemetry:
-#                             d_id = t["drone_id"]
-#                             lat, lon = t["latitude"], t["longitude"]
-#                             # Label limited to 1 character (A–Z, 0–9)
-#                             label = str(d_id)[:1].upper()
-#                             markers += f"&markers=color:red%7Clabel:{label}%7C{lat},{lon}"
-
-
-#                         gmaps_aerial = (
-#                             f"https://www.google.com/maps/embed/v1/place"
-#                             f"?key={API_KEY}"
-#                             f"&q={lat},{lon}"
-#                             f"&zoom=18"
-#                             f"&maptype=satellite"
-#                         )
-
-#                         st.markdown(
-#                             f"""
-#                             <iframe width="100%" height="400"
-#                             src="{gmaps_aerial}"
-#                             style="border:0;" allowfullscreen loading="lazy"></iframe>
-#                             """,
-#                             unsafe_allow_html=True,
-#                         )
-#                     else:
-#                         st.info("Waiting for drone position to load...")
-#             else:
-#                 st.info("Waiting for live telemetry data...")
-
 elif page == "📡 Mission Monitoring":
+    import pydeck as pdk
 
-    import folium
-    from streamlit_folium import st_folium
+    st.title("🛰 Multi-Drone Mission Control Center")
+    refresh_interval = st.sidebar.slider("Telemetry refresh (seconds)", 1, 20, 3)
+    placeholder = st.empty()
 
-    st.title("🛰 Real-Time Mission Monitoring (Folium Map)")
-    refresh_interval = st.sidebar.slider("Telemetry refresh (seconds)", 1, 20, 1)
+    colors = [
+        [0, 100, 255],   # blue
+        [0, 200, 100],   # green
+        [255, 50, 50],   # red
+        [255, 150, 0],   # orange
+        [150, 0, 255],   # purple
+    ]
 
-    # Auto-refresh every N seconds
-    st_autorefresh(interval=refresh_interval * 1000, key="mission_monitor_refresh")
+    if "drone_paths" not in st.session_state:
+        st.session_state["drone_paths"] = {}
 
-    # Fetch drones + telemetry
-    try:
-        drones = requests.get(f"{API}/drones").json()
-        telemetry = requests.get(f"{API}/telemetry").json()
-    except Exception as e:
-        st.error(f"Error fetching live telemetry: {e}")
-        drones, telemetry = [], []
+    count = st_autorefresh(interval=refresh_interval * 1000, key="mission_refresh")
+    placeholder = st.empty()
 
-    if not telemetry:
-        st.info("Waiting for telemetry...")
-        st.stop()
+    def send_command(endpoint, params, success_msg, warn=False):
+        try:
+            r = requests.post(f"{API}/{endpoint}", params=params)
+            if r.ok:
+                if warn:
+                    st.warning(r.json().get("message", success_msg))
+                else:
+                    st.success(r.json().get("message", success_msg))
+            else:
+                st.error(r.text)
+        except Exception as e:
+            st.error(f"Error calling {endpoint}: {e}")
 
-    # Convert telemetry into map positions
-    df = pd.DataFrame([
-        {
-            "drone_id": t["drone_id"],
-            "lat": t["latitude"],
-            "lon": t["longitude"],
-            "alt": t["altitude"],
-            "battery": t["battery"],
-            "progress": t["progress"],
-        }
-        for t in telemetry
-    ])
+    with placeholder.container():
+        st.subheader("🚁 Active Drones")
 
-    # Store historical trails
-    if "trail" not in st.session_state:
-        st.session_state.trail = {}
+        try:
+            drones = requests.get(f"{API}/drones").json()
+            telemetry = requests.get(f"{API}/telemetry").json()
+        except Exception as e:
+            st.error(f"Error fetching data: {e}")
+            drones, telemetry = [], []
 
-    for t in telemetry:
-        d = t["drone_id"]
-        point = (t["latitude"], t["longitude"])
-        st.session_state.trail.setdefault(d, []).append(point)
+        if not drones:
+            st.info("No drones available.")
+        else:
+            telem_map = {t["drone_id"]: t for t in telemetry}
 
-        # Keep only last 100 points
-        if len(st.session_state.trail[d]) > 100:
-            st.session_state.trail[d] = st.session_state.trail[d][-100:]
+            # ✅ 3 cards per row (adjust dynamically)
+            drones_per_row = 3
+            for i in range(0, len(drones), drones_per_row):
+                row_drones = drones[i:i + drones_per_row]
+                cols = st.columns(len(row_drones))
 
-    # Center map on mean position
-    center_lat = df["lat"].mean()
-    center_lon = df["lon"].mean()
+                for idx, d in enumerate(row_drones):
+                    with cols[idx]:
+                        t = telem_map.get(d["id"])
+                        prog = int(t["progress"]) if t else 0
+                        bat = t["battery"] if t else d["battery_level"]
+                        eta = t["eta"] if t else "Calculating..."
 
-    fmap = folium.Map(location=[center_lat, center_lon], zoom_start=16)
+                        # 🎯 Drone Header
+                        st.markdown(f"### 🛩 Drone {d['id']} — {d['name']}")
+                        st.metric("Battery", f"{bat}%")
+                        st.progress(prog)
+                        st.caption(f"Status: {d['status'].capitalize()} | ETA: {eta}")
 
-    # Colors for drones
-    palette = ["red", "blue", "green", "orange", "purple"]
+                        # 🎮 Control Buttons (side-by-side)
+                        btns = st.columns(4)
 
-    # Add drone markers + trails
-    for i, t in df.iterrows():
-        d_id = t["drone_id"]
-        color = palette[(d_id - 1) % len(palette)]
+                        if btns[0].button("🚀 Start", key=f"start_{d['id']}"):
+                            send_command("missions/start", {"drone_id": d["id"]}, "Mission started")
 
-        # Drone marker
-        folium.Marker(
-            location=[t["lat"], t["lon"]],
-            popup=(
-                f"<b>Drone {d_id}</b><br>"
-                f"Battery: {t['battery']}%<br>"
-                f"Altitude: {t['alt']}m<br>"
-                f"Progress: {t['progress']}%"
-            ),
-            icon=folium.Icon(color=color, icon="plane", prefix="fa"),
-        ).add_to(fmap)
+                        if btns[1].button("⏸ Pause", key=f"pause_{d['id']}"):
+                            send_command("missions/pause", {"drone_id": d["id"]}, "Mission paused")
 
-        # Drone trail line
-        if len(st.session_state.trail[d_id]) > 1:
-            folium.PolyLine(
-                st.session_state.trail[d_id],
-                color=color,
-                weight=3,
-                opacity=0.7
-            ).add_to(fmap)
+                        if btns[2].button("▶️ Resume", key=f"resume_{d['id']}"):
+                            send_command("missions/resume", {"drone_id": d["id"]}, "Mission resumed")
 
-    st.subheader("🌍 Live Map (Updated Every Second)")
-    st_folium(fmap, height=600, width=900)
+                        if btns[3].button("🛑 Abort", key=f"abort_{d['id']}"):
+                            send_command("missions/abort", {"drone_id": d["id"]}, "Mission aborted", warn=True)
+                    
+            st.divider()
 
-    # Drone controls
-    st.subheader("🎮 Drone Commands")
+            # --- Enhanced 3D Mission Visualization ---
+            st.subheader("🌍 Real-Time Drone Flight Map (3D View)")
 
-    for d in drones:
-        cols = st.columns([1, 1, 1, 1, 2])
-        d_id = d["id"]
+            if telemetry:
+                # Convert telemetry to DataFrame
+                df_map = pd.DataFrame([
+                    {
+                        "drone_id": t["drone_id"],
+                        "lat": t["latitude"],
+                        "lon": t["longitude"],
+                        "alt": t["altitude"],
+                        "progress": t["progress"],
+                    }
+                    for t in telemetry
+                ])
 
-        cols[0].write(f"🛩 **Drone {d_id}**")
-        cols[1].button("🚀 Start", key=f"start_{d_id}", 
-                       on_click=lambda d_id=d_id: requests.post(f"{API}/missions/start", params={"drone_id": d_id}))
-        cols[2].button("⏸ Pause", key=f"pause_{d_id}",
-                       on_click=lambda d_id=d_id: requests.post(f"{API}/missions/pause", params={"drone_id": d_id}))
-        cols[3].button("▶ Resume", key=f"resume_{d_id}",
-                       on_click=lambda d_id=d_id: requests.post(f"{API}/missions/resume", params={"drone_id": d_id}))
-        cols[4].button("🛑 Abort", key=f"abort_{d_id}",
-                       on_click=lambda d_id=d_id: requests.post(f"{API}/missions/abort", params={"drone_id": d_id}))
+                # Update path history
+                for t in telemetry:
+                    d_id = t["drone_id"]
+                    if d_id not in st.session_state["drone_paths"]:
+                        st.session_state["drone_paths"][d_id] = []
+                    st.session_state["drone_paths"][d_id].append(
+                        (t["longitude"], t["latitude"], t["altitude"])
+                    )
+                    # Keep last 200 points max
+                    if len(st.session_state["drone_paths"][d_id]) > 200:
+                        st.session_state["drone_paths"][d_id] = st.session_state["drone_paths"][d_id][-200:]
 
+                # Build deck.gl layers
+                layers = []
+
+                for idx, (d_id, path_points) in enumerate(st.session_state["drone_paths"].items()):
+                    color = colors[idx % len(colors)]
+
+                    # Flight trail (3D)
+                    path_df = pd.DataFrame([{"path": path_points}])
+                    layers.append(pdk.Layer(
+                        "PathLayer",
+                        data=path_df,
+                        get_path="path",
+                        get_color=color,
+                        width_scale=10,
+                        width_min_pixels=3,
+                        get_width=5,
+                        opacity=0.7,
+                    ))
+
+                    # Current drone marker (3D sphere)
+                    lon, lat, alt = path_points[-1]
+                    layers.append(pdk.Layer(
+                        "ColumnLayer",
+                        data=pd.DataFrame([{"lon": lon, "lat": lat, "alt": alt}]),
+                        get_position='[lon, lat]',
+                        get_elevation="alt",
+                        elevation_scale=1,
+                        radius=10,
+                        get_fill_color=color,
+                        pickable=True,
+                    ))
+
+                # Dynamic 3D camera
+                midpoint = [df_map["lat"].mean(), df_map["lon"].mean()]
+                view_state = pdk.ViewState(
+                    latitude=midpoint[0],
+                    longitude=midpoint[1],
+                    zoom=17,
+                    pitch=60,
+                    bearing=0,
+                )
+
+                # Deck rendering
+                deck = pdk.Deck(
+                    map_style="mapbox://styles/mapbox/satellite-v9",
+                    layers=layers,
+                    initial_view_state=view_state,
+                    tooltip={"text": "Drone {drone_id}\nAltitude: {alt} m"},
+                )
+
+                col1, col2 = st.columns([3, 2])
+
+                with col1:
+                    st.pydeck_chart(deck, use_container_width=True)
+
+                with col2:
+                    st.subheader("🛣️ Street View (Google)")
+                    if telemetry:
+                        # Get last drone position
+                        t = telemetry[-1]
+                        lat, lon = t["latitude"], t["longitude"]
+                        # ✅ Correct Street View URL (uses embedded Google Maps with lat/lon)
+
+                        markers = ""
+                        for t in telemetry:
+                            d_id = t["drone_id"]
+                            lat, lon = t["latitude"], t["longitude"]
+                            # Label limited to 1 character (A–Z, 0–9)
+                            label = str(d_id)[:1].upper()
+                            markers += f"&markers=color:red%7Clabel:{label}%7C{lat},{lon}"
+
+
+                        gmaps_aerial = (
+                            f"https://www.google.com/maps/embed/v1/place"
+                            f"?key={API_KEY}"
+                            f"&q={lat},{lon}"
+                            f"&zoom=18"
+                            f"&maptype=satellite"
+                        )
+
+                        st.markdown(
+                            f"""
+                            <iframe width="100%" height="400"
+                            src="{gmaps_aerial}"
+                            style="border:0;" allowfullscreen loading="lazy"></iframe>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.info("Waiting for drone position to load...")
+            else:
+                st.info("Waiting for live telemetry data...")
 
 
 # -----------------------------------------------------------
