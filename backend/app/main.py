@@ -235,7 +235,7 @@ def start_mission(drone_id: int, session: Session = Depends(get_session)):
     mission = session.exec(
         select(models.Mission)
         .where(models.Mission.drone_id == drone_id,
-               models.Mission.status.in_(["planned", "in_progress"]))
+               models.Mission.status.in_(["planned", "in_progress", "aborted"]))
         .order_by(models.Mission.id.desc())
     ).first()
 

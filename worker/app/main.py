@@ -66,15 +66,17 @@ def sitl_start(payload: Dict[str, Any], background_tasks: BackgroundTasks):
         f"-I{drone_id - 1}",
         "--sysid", str(drone_id),
         # no --map/no --console to avoid GUI
+        # "--map",
+        # "--console",
         f"--mavproxy-args=--out=udp:127.0.0.1:{sitl_udp}",
         f"--custom-location={lat},{lon},{alt},0",
     ]
 
     try:
-        print(os.path.expanduser("~/ardupilot/ArduCopter"))
+        print(os.path.expanduser("~/Desktop/ardupilot/ArduCopter"))
         p = subprocess.Popen(
             sitl_cmd,
-            cwd=os.path.expanduser("~/ardupilot/ArduCopter"),
+            cwd=os.path.expanduser("~/Desktop/ardupilot/ArduCopter"),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )

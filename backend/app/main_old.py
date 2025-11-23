@@ -21,7 +21,7 @@ from threading import Lock
 
 from backend.app import crud, models
 from backend.app.database import init_db, get_session
-from backend.app.mission_runner import MissionController
+from backend.app.backend_mission_runner import MissionController
 
 # ===============================================================
 # GLOBALS AND CONFIG
