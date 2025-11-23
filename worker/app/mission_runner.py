@@ -20,7 +20,7 @@ from pymavlink import mavutil
 import os
 
 # Railway backend URL (must be set in worker environment)
-API_BASE = os.getenv("RAILWAY_BACKEND_URL")
+API_BASE = os.getenv("RAILWAY_BACKEND_URL", "https://testdroneapp-production.up.railway.app/")
 if not API_BASE:
     raise RuntimeError("RAILWAY_BACKEND_URL not set in worker environment.")
 

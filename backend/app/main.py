@@ -18,7 +18,7 @@ from app.database import init_db, get_session
 # ===============================================================
 
 # 👉 Set this in Railway environment variables OR when running locally
-WORKER_URL = os.getenv("WORKER_URL", "http://127.0.0.1:8001")
+WORKER_URL = os.getenv("WORKER_URL", "https://nehemiah-misleading-punctually.ngrok-free.dev")
 
 app = FastAPI(title="Mission Planner API")
 

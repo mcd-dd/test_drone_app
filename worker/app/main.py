@@ -9,12 +9,12 @@ import requests
 from typing import Dict, Any
 
 # Import MissionController from worker copy of mission_runner.py
-from worker.app.mission_runner_old import MissionController
+from app.mission_runner import MissionController
 
 app = FastAPI(title="SITL Worker")
 
 # Config
-RAILWAY_BACKEND = os.getenv("RAILWAY_BACKEND_URL", "http://your-railway-app-url")  # set this on worker env
+RAILWAY_BACKEND = os.getenv("RAILWAY_BACKEND_URL", "https://testdroneapp-production.up.railway.app/")  # set this on worker env
 WORKER_HOST = os.getenv("WORKER_HOST", "0.0.0.0")
 WORKER_PORT = int(os.getenv("WORKER_PORT", "8001"))
 
@@ -48,6 +48,7 @@ def sitl_start(payload: Dict[str, Any], background_tasks: BackgroundTasks):
     Payload expects: { drone_id, mission_id, sitl_udp, sitl_tcp, lat, lon, alt }
     Starts SITL, MAVProxy, and MissionController.
     """
+    print('start mission command recieved')
     drone_id = int(payload["drone_id"])
     sitl_udp = int(payload["sitl_udp"])
     sitl_tcp = int(payload["sitl_tcp"])
@@ -70,6 +71,7 @@ def sitl_start(payload: Dict[str, Any], background_tasks: BackgroundTasks):
     ]
 
     try:
+        print(os.path.expanduser("~/ardupilot/ArduCopter"))
         p = subprocess.Popen(
             sitl_cmd,
             cwd=os.path.expanduser("~/ardupilot/ArduCopter"),
