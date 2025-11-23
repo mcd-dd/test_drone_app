@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+requests
+dronekit
+pymavlink
+sqlmodel
+sqlalchemy
