@@ -638,7 +638,7 @@ elif page == "📡 Mission Monitoring":
     refresh_interval = st.sidebar.slider("Telemetry refresh (seconds)", 1, 20, 1)
 
     # Auto-refresh every N seconds
-    st_autorefresh(interval=refresh_interval * 1000, key="mission_monitor_refresh")
+    st_autorefresh(interval=refresh_interval * 5000, key="mission_monitor_refresh")
 
     # Fetch drones + telemetry
     try:

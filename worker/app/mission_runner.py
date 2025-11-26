@@ -276,6 +276,9 @@ class MissionController:
         if self.thread and self.thread.is_alive():
             print(f"[Worker][Drone {self.drone_id}] Mission already running.")
             return
+        self.running = True   # <-- FIX
+        self.aborted = False  # reset abort flag
+        self.paused = False   # reset pause
         self.thread = threading.Thread(target=self._mission_loop, name=f"Mission-{self.drone_id}")
         self.thread.start()
 
